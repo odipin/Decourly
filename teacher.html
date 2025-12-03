@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Teacher Dashboard</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f3f4f6; }
+    .navbar { background: #047857; color: white; padding: 15px; font-size: 22px; }
+    .container { padding: 25px; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); width: 400px; margin-bottom: 20px; }
+    h2, h3 { margin-top: 0; }
+    input, label { display: block; margin-top: 10px; margin-bottom: 5px; width: 100%; padding: 5px; }
+    button { padding: 10px 15px; background: #047857; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 5px; }
+    button:hover { background: #059669; }
+</style>
+</head>
+<body>
+
+<div class="navbar">Teacher Dashboard</div>
+
+<div class="container">
+    <h2 id="welcome">Welcome, Teacher</h2>
+
+    <!-- Assignment Creation Section -->
+    <div class="card" id="assignmentCard" style="display:none;">
+        <h3>Create Assignment</h3>
+        <label for="assignmentTitle">Assignment Title:</label>
+        <input type="text" id="assignmentTitle" placeholder="Enter assignment title">
+        <label for="assignmentURL">Assignment URL:</label>
+        <input type="text" id="assignmentURL" placeholder="Enter URL">
+        <button onclick="createAssignment()">Create Assignment</button>
+        <div id="assignmentMessage" style="margin-top:10px;color:green;"></div>
+    </div>
+
+    <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const user = params.get("user"); // Aahan Ojha or Abhinav Subedi
+    document.getElementById("welcome").textContent = "Welcome, " + user;
+
+    // Only show assignment creation for Aahan Ojha
+    if(user === "Aahan Ojha"){
+        document.getElementById("assignmentCard").style.display = "block";
+    }
+
+    // Create assignment function
+    function createAssignment(){
+        const title = document.getElementById("assignmentTitle").value.trim();
+        const url = document.getElementById("assignmentURL").value.trim();
+        if(title && url){
+            let assignments = JSON.parse(localStorage.getItem("assignments")) || [];
+            assignments.push({title, url});
+            localStorage.setItem("assignments", JSON.stringify(assignments));
+            document.getElementById("assignmentMessage").textContent = "Assignment created! Copy this URL to share: " + url;
+            document.getElementById("assignmentTitle").value = "";
+            document.getElementById("assignmentURL").value = "";
+        } else {
+            alert("Please enter both title and URL.");
+        }
+    }
+
+    function logout(){
+        window.location.href = "index.html";
+    }
+</script>
+
+</body>
+</html>
+

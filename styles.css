@@ -1,0 +1,121 @@
+/* ===== GENERAL PAGE STYLES ===== */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3 {
+    color: #222;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+    background: #1a73e8;
+    padding: 15px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    margin-left: 15px;
+    font-weight: bold;
+}
+
+/* ===== COURSE CARD GRID ===== */
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 25px;
+}
+
+.course-card {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+}
+
+/* ===== FOLDERS ===== */
+.folder {
+    background: #fff;
+    border: 2px solid #dedede;
+    padding: 12px;
+    border-radius: 10px;
+    display: inline-block;
+    margin: 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.folder:hover {
+    background: #f1f1f1;
+}
+
+/* ===== ASSIGNMENT LINKS ===== */
+.assignment-link {
+    display: block;
+    padding: 12px;
+    margin: 10px 0;
+    background: #e9f0ff;
+    border-left: 5px solid #1a73e8;
+    border-radius: 8px;
+    text-decoration: none;
+    color: black;
+    transition: 0.2s;
+}
+
+.assignment-link:hover {
+    background: #d7e4ff;
+}
+
+/* ===== BUTTONS ===== */
+button {
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #1a73e8;
+    color: white;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #145cc4;
+}
+
+/* ===== PAGE CONTAINER ===== */
+.container {
+    padding: 20px;
+}
+
+/* ===== HIDDEN SECTIONS (for JS navigation) ===== */
+.hidden {
+    display: none;
+}
+
+/* ===================================================== */
+/*          NEW: MATH 4–7 THUMBNAIL STYLE ADDED          */
+/* ===================================================== */
+
+.course-thumbnail {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}

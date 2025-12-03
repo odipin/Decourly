@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Student Dashboard — Combined</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  /* ----- Embedded styles so you don't need an external styles.css ----- */
+  :root{
+    --primary:#1e3a8a;
+    --bg:#f5f7fb;
+    --card:#fff;
+    --muted:#6b7280;
+    --accent:#1a73e8;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#111}
+  .top{background:var(--primary);color:white;padding:12px 16px;font-weight:700}
+  .wrap{display:flex;gap:18px;padding:18px;flex-wrap:wrap}
+  .left{min-width:300px;width:360px}
+  .card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 8px 20px rgba(20,20,50,0.06);margin-bottom:12px}
+  h3{margin:0 0 8px 0}
+  .muted{color:var(--muted);font-size:13px}
+  .course{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;border:1px solid #eee;background:white;margin:8px 0;cursor:pointer}
+  .course:hover{background:#f3f6ff}
+  .course-thumbnail{width:84px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0}
+  .course-title{font-size:16px;font-weight:600}
+  .folder{cursor:pointer;padding:10px;border-radius:8px;border:1px dashed #e6e6e6;background:white;margin:8px 0}
+  .folder-content{display:none;margin-left:12px;margin-top:8px}
+  .assign-card{border:1px solid #e8e8e8;padding:10px;border-radius:8px;margin-bottom:10px;background:white}
+  button{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer}
+  button.done{background:#10b981}
+  a{color:var(--accent);text-decoration:none}
+  input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:8px;box-sizing:border-box}
+  .small{font-size:13px;color:var(--muted)}
+  /* responsive */
+  @media (max-width:880px){.wrap{flex-direction:column}.left{width:100%}}
+</style>
+</head>
+<body>
+
+<div class="top">Student Dashboard</div>
+
+<!-- NOTE: Put math47.png next to this file in the same folder (or update IMG_SRC below). -->
+<!-- e.g. project-folder/student.html
+            project-folder/math47.png -->
+
+<div style="padding:16px">
+  <div class="muted">Logged in as: <strong id="studentNameTxt">student</strong></div>
+
+  <div class="wrap">
+    <!-- left column: courses + assignments -->
+    <div class="left">
+      <div class="card">
+        <h3>Your Courses</h3>
+        <div id="courseList" aria-live="polite"></div>
+      </div>
+
+      <div class="card">
+        <h3>Assignments</h3>
+        <div id="assignmentsList" class="small">Loading assignments…</div>
+      </div>
+    </div>
+
+    <!-- right column: course content -->
+    <div style="flex:1;min-width:360px">
+      <div id="contentArea" class="card">
+        <div id="contentDefault">Select a course on the left to view its folders and resources.</div>
+
+        <!-- Resource content -->
+        <div id="Resource" style="display:none">
+          <h3>Resource</h3>
+          <div class="folder" onclick="toggle('surveysFolder')">📁 Surveys</div>
+          <div id="surveysFolder" class="folder-content">
+            <div class="assign-card">
+              <a target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSeS76IsJ9rJk0NAa7QfIvNVXTjiKVaMXrPZsryYoQfjkltjVw/viewform?usp=header">
+                🎬 Movie Survey (Google Form)
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Math 4-7 -->
+        <div id="Math4-7" style="display:none">
+          <h3>Math 4–7</h3>
+
+          <div class="folder" onclick="toggle('math47Formatives')">📁 Formatives</div>
+          <div id="math47Formatives" class="folder-content"><div class="muted">No formatives yet.</div></div>
+
+          <div class="folder" onclick="toggle('math47Study')">📁 Study Materials</div>
+          <div id="math47Study" class="folder-content"><div class="muted">No study materials yet.</div></div>
+
+          <div class="folder" onclick="toggle('math47Grades')">📁 Grades</div>
+          <div id="math47Grades" class="folder-content">
+            <a target="_blank" href="https://docs.google.com/spreadsheets/d/1MmE3aYQJjFhek9BbkLocZ9PP3lo9OrmeVUxNM0Tr4DE/edit?gid=0#gid=0">
+              📄 Open Grades Sheet
+            </a>
+          </div>
+        </div>
+
+        <!-- Math K-3 -->
+        <div id="MathK-3" style="display:none">
+          <h3>Math K–3</h3>
+
+          <div class="folder" onclick="toggle('mathK3Formatives')">📁 Formatives</div>
+          <div id="mathK3Formatives" class="folder-content"><div class="muted">No formatives yet.</div></div>
+
+          <div class="folder" onclick="toggle('mathK3Study')">📁 Study Materials</div>
+          <div id="mathK3Study" class="folder-content"><div class="muted">No study materials yet.</div></div>
+
+          <div class="folder" onclick="toggle('mathK3Grades')">📁 Grades</div>
+          <div id="mathK3Grades" class="folder-content">
+            <a target="_blank" href="https://docs.google.com/spreadsheets/d/1MmE3aYQJjFhek9BbkLocZ9PP3lo9OrmeVUxNM0Tr4DE/edit?gid=0#gid=0">
+              📄 Open Grades Sheet
+            </a>
+          </div>
+        </div>
+
+        <!-- Other courses -->
+        <div id="Advisory" style="display:none"><h3>Advisory</h3><div class="muted">No special content.</div></div>
+        <div id="Art" style="display:none"><h3>Art</h3><div class="muted">No special content.</div></div>
+        <div id="Band Mechanics" style="display:none"><h3>Band Mechanics</h3><div class="muted">No special content.</div></div>
+        <div id="Computer Apps" style="display:none"><h3>Computer Apps</h3><div class="muted">No special content.</div></div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------------
+   Single-file Student dashboard
+   - Put the thumbnail image named math47.png in the same folder as this file.
+   - localStorage keys used:
+       ASSIGNMENTS_KEY = 'lms_assignments_v1'
+       COMPLETIONS_KEY = 'lms_completions_v1'
+---------------------------------------------------------------------------- */
+
+const IMG_SRC = 'math47.png'; // <-- place math47.png in same folder as student.html
+
+const studentCourses = {
+  "Ayana.R": ["Math 4-7", "Resource", "Advisory", "Art"],
+  "Ashree.R": ["Math K-3", "Resource", "Advisory", "Computer Apps"],
+  "Mivaan.G": ["Math K-3", "Resource", "Advisory", "Computer Apps", "Band Mechanics"],
+  "Aayan.G": ["Math 4-7", "Resource", "Advisory", "Computer Apps"],
+  "Gyra.K": ["Resource", "Math K-3", "Advisory", "Art"],
+  "Baibhav.O": ["Math 4-7", "Resource", "Advisory", "Band Mechanics"],
+  "Bihan.O": ["Math K-3", "Resource", "Advisory", "Band Mechanics"]
+};
+
+const ASSIGNMENTS_KEY = 'lms_assignments_v1';
+const COMPLETIONS_KEY = 'lms_completions_v1';
+
+function loadAssignments(){ return JSON.parse(localStorage.getItem(ASSIGNMENTS_KEY) || '[]'); }
+function saveAssignments(a){ localStorage.setItem(ASSIGNMENTS_KEY, JSON.stringify(a)); }
+function loadCompletions(){ return JSON.parse(localStorage.getItem(COMPLETIONS_KEY) || '{}'); }
+function saveCompletions(c){ localStorage.setItem(COMPLETIONS_KEY, JSON.stringify(c)); }
+
+function uid(){ return 'a_' + Math.random().toString(36).slice(2,9); }
+
+const params = new URLSearchParams(window.location.search);
+const student = params.get('user') || prompt("Enter student username (e.g. Ayana.R)");
+if(!student || !studentCourses[student]) {
+  alert('Unknown or missing student. Use student.html?user=Ayana.R (exact capitalization).');
+  document.getElementById('courseList').innerHTML = '<div class="muted">No user loaded.</div>';
+} else {
+  document.getElementById('studentNameTxt').textContent = student;
+  renderCourses();
+  renderAssignmentsList();
+}
+
+// RENDER COURSES (cards with optional thumbnail)
+function renderCourses(){
+  const courses = studentCourses[student] || [];
+  const list = document.getElementById('courseList');
+  list.innerHTML = '';
+  courses.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'course';
+    // include thumbnail only for Math 4-7
+    let thumbHtml = '';
+    if(c === 'Math 4-7'){
+      thumbHtml = `<img src="${IMG_SRC}" alt="Math 4-7" class="course-thumbnail" onerror="this.style.display='none'">`;
+    } else {
+      thumbHtml = `<div style="width:84px;height:72px;border-radius:8px;background:#fafafa;border:1px solid #eee;display:flex;align-items:center;justify-content:center;color:#999;font-weight:600;">${c.split(' ')[0]}</div>`;
+    }
+    div.innerHTML = `${thumbHtml}<div><div class="course-title">${c}</div><div class="small">${c === 'Math 4-7' ? 'Grades, Study materials, and Formatives' : ''}</div></div>`;
+    div.onclick = () => openCourse(c);
+    list.appendChild(div);
+  });
+}
+
+// OPEN COURSE: show corresponding content block
+function openCourse(course){
+  document.getElementById('contentDefault').style.display = 'none';
+  // hide all course content blocks
+  const blocks = ['Resource','Math4-7','MathK-3','Advisory','Art','Band Mechanics','Computer Apps'];
+  blocks.forEach(b => {
+    const el = document.getElementById(b);
+    if(el) el.style.display = 'none';
+  });
+
+  // map course names to block ids
+  if(course === 'Math 4-7') document.getElementById('Math4-7').style.display = 'block';
+  else if(course === 'Math K-3') document.getElementById('MathK-3').style.display = 'block';
+  else {
+    const id = course;
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'block';
+    else document.getElementById('contentDefault').style.display = 'block';
+  }
+}
+
+// Toggle folder visibility
+function toggle(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+
+/* ------------------------------
+   ASSIGNMENTS + COMPLETIONS
+------------------------------- */
+function renderAssignmentsList(){
+  const assigns = loadAssignments();
+  const comps = loadCompletions();
+  const container = document.getElementById('assignmentsList');
+  container.innerHTML = '';
+  const courses = studentCourses[student] || [];
+
+  // filter assignments relevant to this student
+  const relevant = assigns.filter(a => {
+    // show if subject matches any course exactly OR subject === 'Resource' and student has Resource
+    return courses.includes(a.subject) || (a.subject === 'Resource' && courses.includes('Resource'));
+  });
+
+  if(relevant.length === 0){
+    container.innerHTML = '<div class="muted">No assignments yet.</div>';
+    return;
+  }
+
+  // newest first
+  relevant.sort((a,b)=>b.createdAt - a.createdAt);
+
+  relevant.forEach(a => {
+    const compTs = (comps[a.id] && comps[a.id][student]) ? comps[a.id][student] : null;
+    const card = document.createElement('div');
+    card.className = 'assign-card';
+    let html = `<div style="display:flex;justify-content:space-between;align-items:center">
+                <div><strong>${escapeHtml(a.title)}</strong><div class="small">${escapeHtml(a.subject)} • Created by ${escapeHtml(a.createdBy)}</div></div>`;
+    html += `<div>`;
+    if(a.url) html += `<a target="_blank" href="${escapeHtml(a.url)}">Open</a>`;
+    html += `</div></div>`;
+
+    if(a.description) html += `<div class="small" style="margin-top:8px">${escapeHtml(a.description)}</div>`;
+
+    html += `<div style="margin-top:8px">`;
+    if(compTs){
+      html += `<button class="done" disabled>Done ✓</button> <span class="small"> ${new Date(compTs).toLocaleString()}</span>`;
+    } else {
+      html += `<button onclick="markDone('${a.id}')">Mark as Done</button>`;
+    }
+    html += `</div>`;
+
+    card.innerHTML = html;
+    container.appendChild(card);
+  });
+}
+
+function markDone(assignmentId){
+  const comps = loadCompletions();
+  if(!comps[assignmentId]) comps[assignmentId] = {};
+  comps[assignmentId][student] = Date.now();
+  saveCompletions(comps);
+  renderAssignmentsList();
+}
+
+// small helper
+function escapeHtml(s){ return (s||'').toString().replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+/* keep UI in sync if localStorage changed in other tab */
+window.addEventListener('storage', (e)=>{
+  if(e.key === ASSIGNMENTS_KEY || e.key === COMPLETIONS_KEY){
+    renderAssignmentsList();
+  }
+});
+</script>
+</body>
+</html>
