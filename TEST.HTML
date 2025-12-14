@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PA Test</title>
+</head>
+<body>
+
+<div id="nav"></div>
+<div id="content"></div>
+
+<script>
+  const nav = document.getElementById("nav");
+  const content = document.getElementById("content");
+
+  const btn = document.createElement("button");
+  btn.textContent = "P.A System";
+  btn.onclick = () => {
+    content.innerHTML = `
+      <h2>P.A System</h2>
+      <input id="msg" placeholder="Type announcement">
+      <button onclick="send()">Send</button>
+      <button onclick="stop()">Stop</button>
+      <div id="banner"></div>
+    `;
+  };
+  nav.appendChild(btn);
+
+  function send(){
+    document.getElementById("banner").innerHTML =
+      "<div style='background:yellow;padding:10px'>ANNOUNCEMENT ACTIVE</div>";
+  }
+  function stop(){
+    document.getElementById("banner").innerHTML = "";
+  }
+</script>
+
+</body>
+</html>
