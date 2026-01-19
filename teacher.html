@@ -1,71 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Teacher Dashboard</title>
-<style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f3f4f6; }
-    .navbar { background: #047857; color: white; padding: 15px; font-size: 22px; }
-    .container { padding: 25px; }
-    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); width: 400px; margin-bottom: 20px; }
-    h2, h3 { margin-top: 0; }
-    input, label { display: block; margin-top: 10px; margin-bottom: 5px; width: 100%; padding: 5px; }
-    button { padding: 10px 15px; background: #047857; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 5px; }
-    button:hover { background: #059669; }
-</style>
+  <meta charset="UTF-8"><title>Livestudent Teacher</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<div class="navbar">Teacher Dashboard</div>
-
+<div class="navbar">Livestudent Dashboard</div>
+<div id="nav"></div>
 <div class="container">
-    <h2 id="welcome">Welcome, Teacher</h2>
-
-    <!-- Assignment Creation Section -->
-    <div class="card" id="assignmentCard" style="display:none;">
-        <h3>Create Assignment</h3>
-        <label for="assignmentTitle">Assignment Title:</label>
-        <input type="text" id="assignmentTitle" placeholder="Enter assignment title">
-        <label for="assignmentURL">Assignment URL:</label>
-        <input type="text" id="assignmentURL" placeholder="Enter URL">
-        <button onclick="createAssignment()">Create Assignment</button>
-        <div id="assignmentMessage" style="margin-top:10px;color:green;"></div>
-    </div>
-
-    <button onclick="logout()">Logout</button>
+  <div id="assignmentsView">
+    <div class="card">
+      <h3>Create Assignment</h3>
+      <select id="aSub" onchange="updateTargets()"><option value="ALL">Everyone</option></select>
+      <select id="aTarget"></select>
+      <input id="aTitle" placeholder="Title">
+      <input id="aUrl" placeholder="Link">
+      <button onclick="postA()" class="success">Send</button>
+    </div> 
+    <div id="list"></div>
+  </div>
+  <div id="contentView" class="hidden"><div id="content"></div></div>
 </div>
-
+<script src="app.js"></script>
 <script>
-    const params = new URLSearchParams(window.location.search);
-    const user = params.get("user"); // Aahan Ojha or Abhinav Subedi
-    document.getElementById("welcome").textContent = "Welcome, " + user;
-
-    // Only show assignment creation for Aahan Ojha
-    if(user === "Aahan Ojha"){
-        document.getElementById("assignmentCard").style.display = "block";
-    }
-
-    // Create assignment function
-    function createAssignment(){
-        const title = document.getElementById("assignmentTitle").value.trim();
-        const url = document.getElementById("assignmentURL").value.trim();
-        if(title && url){
-            let assignments = JSON.parse(localStorage.getItem("assignments")) || [];
-            assignments.push({title, url});
-            localStorage.setItem("assignments", JSON.stringify(assignments));
-            document.getElementById("assignmentMessage").textContent = "Assignment created! Copy this URL to share: " + url;
-            document.getElementById("assignmentTitle").value = "";
-            document.getElementById("assignmentURL").value = "";
-        } else {
-            alert("Please enter both title and URL.");
-        }
-    }
-
-    function logout(){
-        window.location.href = "index.html";
-    }
+  function updateTargets() {
+    const sub = document.getElementById("aSub").value;
+    const t = document.getElementById("aTarget");
+    t.innerHTML = '<option value="all">Everyone in List</option>';
+    const r = sub === "ALL" ? STUDENTS.map(s=>s.toLowerCase()) : (enrollment[sub] || []);
+    r.forEach(k => t.innerHTML += `<option value="${k}">${k.toUpperCase()}</option>`);
+  }
+  function postA() {
+    const a = JSON.parse(localStorage.getItem("assignments")) || [];
+    const sub = document.getElementById("aSub").value;
+    const target = document.getElementById("aTarget").value;
+    a.push({ 
+        title: document.getElementById("aTitle").value, 
+        url: document.getElementById("aUrl").value,
+        targets: target === "all" ? (sub === "ALL" ? STUDENTS.map(s=>s.toLowerCase()) : enrollment[sub]) : [target],
+        by: session.key, id: Date.now() 
+    });
+    localStorage.setItem("assignments", JSON.stringify(a)); render();
+  }
+  function render() {
+    const l = document.getElementById("list"); l.innerHTML = "";
+    const a = JSON.parse(localStorage.getItem("assignments")) || [];
+    a.filter(x => x.by === session.key).forEach((x, i) => {
+      l.innerHTML += `<div class="card"><b>${x.title}</b> <button onclick="del(${i})" class="danger">X</button></div>`;
+    });
+  }
+  function del(i) {
+    const a = JSON.parse(localStorage.getItem("assignments"));
+    a.splice(i, 1); localStorage.setItem("assignments", JSON.stringify(a)); render();
+  }
+  subjects.forEach(s => document.getElementById("aSub").innerHTML += `<option value="${s}">${s}</option>`);
+  updateTargets(); render();
 </script>
-
 </body>
 </html>
-
