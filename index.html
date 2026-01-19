@@ -1,276 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Decourly</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
-  body{background:#f0f2f5;color:#222}
-  #screen{height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem}
-  #screen input, #screen select{padding:.55rem;border-radius:6px;border:1px solid #aaa;width:240px}
-  #screen button{padding:.55rem 1rem;border-radius:6px;border:0;background:#4caf50;color:#fff;font-weight:700;cursor:pointer}
-  #main-page{display:none;padding:1rem 1.5rem}
-  header{background:#4caf50;color:#fff;padding:12px;border-radius:8px;margin-bottom:12px}
-  nav ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin-top:8px;padding:0}
-  nav button{padding:.45rem .8rem;border-radius:6px;border:0;background:#fff;color:#4caf50;font-weight:700;cursor:pointer}
-  main{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
-  #assignments{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-  .assignment{background:#fff;padding:10px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
-  .assignment h2{font-size:1rem;margin-bottom:6px}
-  .small{font-size:.88rem;color:#555}
-  .danger{color:#b00020;font-weight:700}
-</style>
+    <meta charset="UTF-8">
+    <title>Decourly Login</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="container" style="display:flex; justify-content:center; align-items:center; height:100vh;">
+        <div class="card" style="width:350px; text-align:center;">
+            <h1>DECOURLY</h1>
+            <div id="loginForm">
+                <input type="text" id="username" placeholder="Username (Your Name)">
+                <div id="passArea" style="display:none;">
+                    <input type="password" id="password" placeholder="Teacher Password">
+                </div>
+                <button onclick="handleLogin()" style="width:100%; margin-top:10px;">Enter</button>
+            </div>
+        </div>
+    </div>
 
-<!-- SCREEN (dynamic: create account / choose student / login) -->
-<div id="screen"></div>
+    <script>
+        // List of people with Teacher/Admin access
+        const teacherPasses = {
+            "ayana": "ayana1062014",
+            "aayan": "aayan1062014",
+            "mivaan": "mivaan1062014",
+            "ashree": "ashree1062014",
+            "baibhav": "baibhav1062014",
+            "bihan": "bihan1062014",
+            "zyra": "zyra1062014"
+        };
 
-<!-- MAIN PAGE -->
-<div id="main-page">
-  <header>
-    <h2>Decourly LMS</h2>
-    <div class="small">Secure teacher/student area</div>
-    <nav><ul id="nav-folders"></ul></nav>
-  </header>
-  <main>
-    <section id="assignments"></section>
-  </main>
+        // UI Logic to show password field only if they type a teacher name
+        document.getElementById('username').addEventListener('input', (e) => {
+            const name = e.target.value.toLowerCase().trim();
+            document.getElementById('passArea').style.display = teacherPasses[name] ? 'block' : 'none';
+        });
 
-<script id="teacher-panel-script">
-// --- TEACHER PANEL INSERT ---
-(function(){
-  const teacherPanel = document.createElement('section');
-  teacherPanel.id = 'teacher-panel';
-  teacherPanel.style.background = '#e8f5e9';
-  teacherPanel.style.padding = '12px';
-  teacherPanel.style.borderRadius = '8px';
-  teacherPanel.style.marginBottom = '20px';
-  teacherPanel.innerHTML = `
-    <h2 style="color:#2e7d32;margin-bottom:6px">Teacher — Add Assignments</h2>
+        function handleLogin() {
+            const u = document.getElementById("username").value.toLowerCase().trim();
+            const p = document.getElementById("password").value.trim();
 
-    <label class="small"><strong>Choose folder:</strong></label>
-    <select id="teacher-folder-select" style="padding:.5rem;border-radius:6px;border:1px solid #ccc;width:240px;margin-bottom:8px"></select>
+            if (teacherPasses[u]) {
+                // Teacher Login Path
+                if (p === teacherPasses[u]) {
+                    saveSession(u, "teacher");
+                } else {
+                    alert("Incorrect Teacher Password!");
+                }
+            } else if (u !== "") {
+                // Student Login Path (No password required)
+                saveSession(u, "student");
+            }
+        }
 
-    <input id="teacher-title" placeholder="Assignment Title" style="padding:.5rem;border-radius:6px;border:1px solid #ccc;width:240px;margin-bottom:8px"/>
-    <input id="teacher-url" placeholder="Assignment URL (https://...)" style="padding:.5rem;border-radius:6px;border:1px solid #ccc;width:240px;margin-bottom:8px"/>
-
-    <button id="teacher-add-btn" style="padding:.45rem .8rem;border-radius:6px;border:0;background:#4caf50;color:#fff;font-weight:700;cursor:pointer">Add Assignment</button>
-    <div id="teacher-msg" class="small" style="margin-top:6px"></div>
-  `;
-
-  document.querySelector('main').prepend(teacherPanel);
-
-  const folderSelect = document.getElementById('teacher-folder-select');
-
-  function refreshTeacherFolders(folders){
-    folderSelect.innerHTML = '';
-    folders.forEach(f => {
-      const opt = document.createElement('option');
-      opt.value = f;
-      opt.textContent = ALL_FOLDERS[f] || f;
-      folderSelect.appendChild(opt);
-    });
-  }
-
-  window.enableTeacherPanel = function(folders){
-    teacherPanel.style.display = 'block';
-    refreshTeacherFolders(folders);
-  }
-
-  window.disableTeacherPanel = function(){
-    teacherPanel.style.display = 'none';
-  }
-
-  document.getElementById('teacher-add-btn').onclick = function(){
-    const folder = folderSelect.value;
-    const title = document.getElementById('teacher-title').value.trim();
-    const url = document.getElementById('teacher-url').value.trim();
-    const msg = document.getElementById('teacher-msg');
-    msg.textContent = '';
-
-    if(!title){ msg.textContent='Enter a title.'; return; }
-    if(!url.startsWith('http')){ msg.textContent='Enter a valid URL.'; return; }
-
-    assignments[folder].push({ title, url });
-    saveAssignments();
-
-    msg.textContent = 'Assignment added!';
-    document.getElementById('teacher-title').value = '';
-    document.getElementById('teacher-url').value = '';
-  }
-})();
-</script>
-</div>
-
-<script>
-/* ------------------ FOLDER KEYS ------------------ */
-const ALL_FOLDERS = {
-  mathk3:"Math K-3",
-  math47:"Math 4-7",
-  resource:"Resource",
-  advisory:"Advisory",
-  art:"Art",
-  pe:"PE",
-  comps:"Computer Apps",
-  band:"Band Mechanics",
-  febe:"FEBE History",
-  comps2:"Computer Apps (S2)",
-  art2:"Art (S2)",
-  recess:"Recess"
-};
-
-/* ------------------ STUDENT COURSES ------------------ */
-const studentCourses = {
-  BAIBHAV:["math47","resource","advisory","art","band","pe"],
-  MIVAAN:["mathk3","resource","advisory","band","comps","pe"],
-  ASHREE:["mathk3","resource","advisory","comps","pe"],
-  ZYRA:["mathk3","advisory","resource","art","pe"],
-  BIHAN:["mathk3","resource","advisory","band","art","pe"],
-  AAYANA:["math47","resource","advisory","art","pe"],
-  AAYAN:["math47","resource","advisory","comps","pe"]
-};
-
-/* ------------------ TEACHER COURSES ------------------ */
-const teacherCourses = {
-  AAHAN:["mathk3","math47","resource","band","febe"],
-  ABHINAV:["comps","art","pe","resource","comps2","art2","recess"]
-};
-
-/* ------------------ ASSIGNMENTS STORAGE ------------------ */
-let assignments = loadAssignments();
-function loadAssignments(){
-  try{
-    const raw = localStorage.getItem("assignments_v2");
-    if(raw) return JSON.parse(raw);
-  }catch{}
-  const obj={};
-  Object.keys(ALL_FOLDERS).forEach(f=>obj[f]=[]);
-  return obj;
-}
-function saveAssignments(){ localStorage.setItem("assignments_v2",JSON.stringify(assignments)); }
-
-/* ------------------ STATE ------------------ */
-let currentUser = null;
-let currentRole = null; // student or teacher
-
-/* ------------------ SCREEN BUILDER ------------------ */
-const screen = document.getElementById("screen");
-const mainPage = document.getElementById("main-page");
-const navFolders = document.getElementById("nav-folders");
-const assignmentsContainer = document.getElementById("assignments");
-
-function showCreateAccount(){
-  screen.innerHTML = `
-    <h1>Create Account</h1>
-    <input id="new-username" placeholder="Create a username" />
-    <button onclick="submitCreateAccount()">Create Account</button>
-    <button onclick="showLogin()" style="background:#555">Already Have an Account</button>
-  `;
-}
-
-function submitCreateAccount(){
-  const u = document.getElementById("new-username").value.trim();
-  if(!u) return;
-  currentUser = u;
-  showChooseStudent();
-}
-
-function showChooseStudent(){
-  screen.innerHTML=`<h1>Select Your Name</h1>`;
-  Object.keys(studentCourses).forEach(name=>{
-    const b=document.createElement("button");
-    b.textContent=name;
-    b.style.width="240px";
-    b.onclick=()=>finishStudentSignup(name);
-    screen.appendChild(b);
-  });
-}
-
-function finishStudentSignup(name){
-  currentUser = name;
-  currentRole = "student";
-  enterCourses(studentCourses[name]);
-}
-
-function showLogin(){
-  screen.innerHTML=`
-    <h1>Login</h1>
-    <input id="login-user" placeholder="Username" />
-    <button onclick="submitLogin()">Login</button>
-    <button onclick="showCreateAccount()" style="background:#888">Create Account</button>
-  `;
-}
-
-function submitLogin(){
-  const u = document.getElementById("login-user").value.trim().toUpperCase();
-  if(!u) return;
-
-  if(teacherCourses[u]){
-    currentUser = u;
-    currentRole = "teacher";
-    enterCourses(teacherCourses[u]);
-    return;
-  }
-
-  if(studentCourses[u]){
-    currentUser = u;
-    currentRole = "student";
-    enterCourses(studentCourses[u]);
-    return;
-  }
-
-  alert("Account not found.");
-}
-
-/* ------------------ ENTER COURSES ------------------ */
-function enterCourses(folders){
-  screen.style.display="none";
-  mainPage.style.display="block";
-  buildNav(folders);
-  if(currentRole==="teacher") enableTeacherPanel(folders);
-  else disableTeacherPanel();
-  showAssignments(folders[0]);
-  screen.style.display="none";
-  mainPage.style.display="block";
-  buildNav(folders);
-  showAssignments(folders[0]);
-}
-
-/* ------------------ NAV + ASSIGNMENTS ------------------ */
-function buildNav(folders){
-  navFolders.innerHTML="";
-  folders.forEach(f=>{
-    const li=document.createElement("li");
-    const btn=document.createElement("button");
-    btn.textContent=ALL_FOLDERS[f] || f;
-    btn.onclick=()=>showAssignments(f);
-    li.appendChild(btn);
-    navFolders.appendChild(li);
-  });
-}
-
-function showAssignments(folder){
-  assignmentsContainer.innerHTML="";
-  const list = assignments[folder] || [];
-  if(list.length===0){
-    assignmentsContainer.innerHTML=`<p>No assignments yet.</p>`;
-    return;
-  }
-  list.forEach(item=>{
-    const card=document.createElement("div");
-    card.className="assignment";
-    card.innerHTML=`<h2>${item.title}</h2><div class="small"><a href="${item.url}" target="_blank">${item.url}</a></div>`;
-    assignmentsContainer.appendChild(card);
-  });
-}
-
-/* ------------------ INIT ------------------ */
-showCreateAccount();
-</script>
-<div id="nav"></div>
-<div id="content"></div>
-
+        function saveSession(user, role) {
+            localStorage.setItem("session", JSON.stringify({
+                key: user,
+                role: role,
+                name: user.toUpperCase()
+            }));
+            window.location.href = "app.html";
+        }
+    </script>
 </body>
-</html>
+</html> 
