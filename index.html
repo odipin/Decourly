@@ -1,67 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Decourly Login</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Student Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container" style="display:flex; justify-content:center; align-items:center; height:100vh;">
-        <div class="card" style="width:350px; text-align:center;">
-            <h1>DECOURLY</h1>
-            <div id="loginForm">
-                <input type="text" id="username" placeholder="Username (Your Name)">
-                <div id="passArea" style="display:none;">
-                    <input type="password" id="password" placeholder="Teacher Password">
-                </div>
-                <button onclick="handleLogin()" style="width:100%; margin-top:10px;">Enter</button>
-            </div>
-        </div>
+
+<div class="navbar">Student Dashboard</div>
+<div id="nav"></div>
+
+<div class="container">
+  <div id="assignmentsView">
+    <div class="card">
+      <h3>Your Assignments</h3>
+      <div id="alist"></div>
     </div>
+  </div>
 
-    <script>
-        // List of people with Teacher/Admin access
-        const teacherPasses = {
-            "ayana": "ayana1062014",
-            "aayan": "aayan1062014",
-            "mivaan": "mivaan1062014",
-            "ashree": "ashree1062014",
-            "baibhav": "baibhav1062014",
-            "bihan": "bihan1062014",
-            "zyra": "zyra1062014"
-        };
+  <div id="contentView" class="hidden">
+    <div id="content" class="card"></div>
+  </div>
+</div>
 
-        // UI Logic to show password field only if they type a teacher name
-        document.getElementById('username').addEventListener('input', (e) => {
-            const name = e.target.value.toLowerCase().trim();
-            document.getElementById('passArea').style.display = teacherPasses[name] ? 'block' : 'none';
-        });
+<script src="app.js"></script>
+<script>
+if (!session || session.role !== "student") {
+  location.href = "index.html";
+}
 
-        function handleLogin() {
-            const u = document.getElementById("username").value.toLowerCase().trim();
-            const p = document.getElementById("password").value.trim();
+function renderAssignments() {
+  const alist = document.getElementById("alist");
+  alist.innerHTML = "";
+  const assignments = (JSON.parse(localStorage.getItem("assignments")) || [])
+    .filter(a => a.to === "all" || a.to === session.key);
 
-            if (teacherPasses[u]) {
-                // Teacher Login Path
-                if (p === teacherPasses[u]) {
-                    saveSession(u, "teacher");
-                } else {
-                    alert("Incorrect Teacher Password!");
-                }
-            } else if (u !== "") {
-                // Student Login Path (No password required)
-                saveSession(u, "student");
-            }
-        }
+  if (!assignments.length) {
+    alist.innerHTML = `<p class="muted">No assignments available.</p>`;
+    return;
+  }
 
-        function saveSession(user, role) {
-            localStorage.setItem("session", JSON.stringify({
-                key: user,
-                role: role,
-                name: user.toUpperCase()
-            }));
-            window.location.href = "app.html";
-        }
-    </script>
+  assignments.forEach(a => {
+    const card = document.createElement("div");
+    card.className = "assign-card";
+    card.innerHTML = `<strong>${a.title}</strong><br><a href="${a.url}" target="_blank">Open</a>`;
+    alist.appendChild(card);
+  });
+}
+renderAssignments();
+</script>
 </body>
-</html> 
+</html>
